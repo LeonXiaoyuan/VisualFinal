@@ -1,0 +1,62 @@
+body{
+    padding:0px;
+    margin: 0px;
+}
+#header_content{
+    background: lightgray;
+    padding:10px;
+    overflow: auto;
+}
+#title{
+    position: relative;
+    float: left;
+    font-size: 40px;
+}
+#nav {
+    position: relative;
+    float: right;
+}
+#nav li{
+    padding-top: 60px;
+    padding-bottom: 0px;
+    list-style: none;
+    display: inline-block;
+}
+#nav a {
+    text-decoration: none;
+    padding: 3px 12px;
+    background: limegreen;
+    border-radius: 5px;
+    color: black;
+}
+#num_twitter{
+    float:left;
+    width: 40%;
+    height: 500px;
+    border:4px solid;
+    /*background: orange;*/
+
+}
+#map_area{
+    float: right;
+    width: 58%;
+    height: 500px;
+    border:4px solid;
+    /*background: blue;*/
+}
+.twitters, .twitters svg {
+    position: absolute;
+}
+.twitters svg {
+    width: 60px;
+    height: 20px;
+    padding-right: 100px;
+    /*padding-right: 200px;*/
+    font: 10px sans-serif;
+}
+.twitters circle {
+    fill: red;
+    stroke: black;
+    stroke-width: 1.5px;
+}
+
