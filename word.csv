@@ -1,4 +1,9 @@
 start,end,label
+5 PM,6 PM,Election
+5 PM,6 PM,Female
+5 PM,6 PM,President
+5 PM,6 PM,Landslide
+5 PM,6 PM,Crush
 5 PM,6 PM,Vote
 5 PM,6 PM,Liar
 5 PM,6 PM,Hate
@@ -16,9 +21,11 @@ start,end,label
 8 PM,9 PM,Florida
 8 PM,9 PM,Surprise
 9 PM,10 PM,Canada
+9 PM,10 PM,Disappointed
 9 PM,10 PM,Anxiety
 9 PM,10 PM,Indiana
 9 PM,10 PM,President
+9 PM,10 PM,Rural
 10 PM,11 PM,Obama
 10 PM,11 PM,Tower
 10 PM,11 PM,Wall
@@ -34,3 +41,9 @@ start,end,label
 2 AM,3 AM,Hate
 2 AM,3 AM,Stock
 2 AM,3 AM,Crash
+2 AM,3 AM,End
+2 AM,3 AM,Why
+2 AM,3 AM,Revolution
+2 AM,3 AM,Fight
+2 AM,3 AM,Cry
+2 AM,3 AM,Despair
