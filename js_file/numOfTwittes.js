@@ -302,7 +302,6 @@ function draw_map(){
                         .style("opacity", 0.6);
 
                     var state_data = d3.select(this).data();
-                    console.log(state_data[0].properties);
 
                     var coordinates = d3.mouse(this);
                     var x = coordinates[0];
