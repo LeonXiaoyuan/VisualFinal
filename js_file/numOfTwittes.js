@@ -405,7 +405,36 @@ function draw_character(){
         .attr("id", "character")
         .attr("width", 150)
         .attr("height", 400)
-        //.attr("transform", "translate(1000,53)");
+        //.attr("transform", "translate(50,53)");
+
+    img_group.append("g")
+        .attr("id", "character_title")
+        .append("text")
+        .text("Support Rate Based on Emotion Analysis")
+        .attr("transform", "translate(770,100)")
+        .style("font-size", "22px")
+        .style("font-family", "verdana")
+        .style("fill", "white");
+
+    var names = img_group.append("g")
+        .attr("id", "candidate_name");
+
+    names.append("text")
+        .text("Trump")
+        .attr("id", "trump_support_rate")
+        .attr("transform", "translate(770,450)")
+        .style("font-size", "22px")
+        .style("font-family", "verdana")
+        .style("fill", "white");
+
+    names.append("text")
+        .text("Hillary")
+        .attr("id", "hillary_support_rate")
+        .attr("transform", "translate(1050,450)")
+        .style("font-size", "22px")
+        .style("font-family", "verdana")
+        .style("fill", "white");
+
 
     img_group.append("g")
         .append("image")
@@ -426,6 +455,8 @@ function draw_character(){
         .attr("height", 150)
         .attr("x", 1050)
         .attr("y",200);
+
+
 
 }
 
@@ -453,6 +484,15 @@ function draw_points_onmap(){
                 ,d.geo.coordinates[0].toString()])[1];
         })
         .attr("r", 0)
+        .attr("class", function(d){
+            if (d.hillary != 0){
+                return "hillary_point";
+            }
+            if (d.trump != 0){
+                return "trump_point";
+            }
+            return "neutrality"
+        })
         .style("fill", function(d){
             if (d.hillary != 0){
                 return "#fd47a5";
@@ -469,7 +509,6 @@ function draw_points_onmap(){
                 .attr("r", Math.sqrt(200));
 
             var twitter_data = d3.select(this).data()[0];
-            console.log(twitter_data);
             var coordinates = d3.mouse(this);
             var x = coordinates[0];
             var y = coordinates[1];
@@ -480,8 +519,6 @@ function draw_points_onmap(){
             d3.select("#twitter")
                 .text(twitter_data.text);
 
-            //d3.select("#post_time")
-            //    .text(twitter_data.created_at);
 
             d3.select("#post_time")
                 .text(function(){
@@ -528,6 +565,9 @@ function draw_vote_distribution(){
     var trump = [vote[0], vote[1]];
     var hillary = [vote[2], vote[3]];
 
+    console.log(trump)
+    console.log(hillary)
+
 
     var trump_pie = pie_group.append("g")
         .attr("id", "trump_pie");
@@ -562,6 +602,7 @@ function draw_vote_distribution(){
 
 
     //var color = ["#eff3ff","#c6dbef","#9ecae1","#6baed6","#3182bd","#08519c"];
+    // Trump pie
     var color = ["#ca0020","#bdbdbd"];
 
     var path = arcs.append("path")
@@ -575,12 +616,27 @@ function draw_vote_distribution(){
             d3.select(this)
                 .transition()
                 .attr("d", arc_over);
+
+            d3.selectAll(".hillary_point")
+                .style("opacity", "0.5");
+            d3.selectAll(".neutrality")
+                .style("opacity", "0.5");
+            d3.selectAll(".trump_point")
+                .attr("r", Math.sqrt(200));
+
         })
         .on("mouseout", function(){
             d3.select(this)
                 .transition()
                 .duration(100)
-                .attr("d", arc)
+                .attr("d", arc);
+            d3.selectAll(".hillary_point")
+                .style("opacity", "1");
+            d3.selectAll(".neutrality")
+                .style("opacity", "1");
+            d3.selectAll(".trump_point")
+                .attr("r", Math.sqrt(30));
+
         })
         .on("click", pupopen);
 
@@ -608,6 +664,13 @@ function draw_vote_distribution(){
             d3.select(this)
                 .transition()
                 .attr("d", arc_over);
+
+            d3.selectAll(".trump_point")
+                .style("opacity", "0.5");
+            d3.selectAll(".neutrality")
+                .style("opacity", "0.5");
+            d3.selectAll(".hillary_point")
+                .attr("r", Math.sqrt(200));
         })
         .on("mouseout", function(){
             d3.select(this)
@@ -615,7 +678,40 @@ function draw_vote_distribution(){
                 .duration(100)
                 .attr("d", arc);
 
+            d3.selectAll(".trump_point")
+                .style("opacity", "1");
+            d3.selectAll(".neutrality")
+                .style("opacity", "1");
+            d3.selectAll(".hillary_point")
+                .attr("r", Math.sqrt(30));
+
         });
+    //names.append("text")
+    //    .text("Trump")
+    //    .attr("id", "trump_support_rate")
+    //    .attr("transform", "translate(810,450)")
+    //    .style("font-size", "22px")
+    //    .style("font-family", "verdana")
+    //    .style("fill", "white");
+    //
+    //names.append("text")
+    //    .text("Hillary")
+    //    .attr("id", "hillary_support_rate")
+    //    .attr("transform", "translate(1090,450)")
+    //    .style("font-size", "22px")
+    //    .style("font-family", "verdana")
+    //    .style("fill", "white");
+
+    d3.select("#trump_support_rate")
+        .transition()
+        .duration(500)
+        .text("Trump: " + (trump[0]/(trump[0] + trump[1]) * 100).toFixed(2) + "%")
+        .style("fill", "#ca0020");
+    d3.select("#hillary_support_rate")
+        .transition()
+        .duration(500)
+        .text("Hillary: " + (hillary[0]/(hillary[0] + hillary[1]) * 100).toFixed(2) + "%")
+        .style("fill", "#0571b0");
 }
 
 function pupopen(){
