@@ -1,4 +1,4 @@
-body{
+#homepage{
     padding:0px;
     margin: 0px;
     /*background-color: blue;*/
@@ -10,11 +10,13 @@ body{
     overflow: auto;
 }
 #title{
+    font-family: 'Source Sans Pro', sans-serif;
     position: relative;
     float: left;
     font-size: 40px;
 }
 #nav {
+    font-family: 'Source Sans Pro', sans-serif;
     position: relative;
     float: right;
 }
@@ -27,7 +29,8 @@ body{
 #nav a {
     text-decoration: none;
     padding: 3px 12px;
-    background: limegreen;
+    /*background: limegreen;*/
+    background: #bcbddc;
     border-radius: 5px;
     color: black;
 }
@@ -64,5 +67,10 @@ body{
     stroke: black;
     stroke-width: 1.5px;
 }
+#more_page{
+    width: 80%;
+    margin:0 auto;
+}
+
 
 
