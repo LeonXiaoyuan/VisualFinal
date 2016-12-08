@@ -4,7 +4,7 @@
 
 
 var volumn = [];
-var raw_data = [];
+var location_point = [];
 var trump_pos = [], trump_negt = [], hillary_pos = [], hillary_negt = [];
 var vote = [0, 0, 0, 0];
 var svg_w = 1000;
@@ -30,7 +30,7 @@ function data_load() {
                 current_minute = -1;
             data.forEach(function (d, i) {
 
-                //raw_data.push(d);
+                //location_point.push(d);
 
                 var date = new Date(d["created_at"]);
                 //console.log(date);
@@ -85,7 +85,7 @@ function data_load() {
                         , d.geo.coordinates[0].toString()]);
 
                     if (location_projection != null) {
-                        raw_data.push(d);
+                        location_point.push(d);
                     }
                 }
 
@@ -134,7 +134,7 @@ function data_load() {
 
 
             //draw_map();
-            draw_bars();
+            //draw_bars();
             draw_points_onmap();
             draw_vote_distribution();
         });
@@ -221,7 +221,7 @@ function draw_map(){
     //    .attr("width", "100%")
     //    .attr("height", svg_h);
 
-    //console.log(raw_data[1027]);
+    //console.log(location_point[1027]);
 
     var projection = d3.geoAlbersUsa()
         .translate([svg_w/2, svg_h/2])
@@ -338,7 +338,7 @@ function draw_map(){
 
             //map_point.attr("transform", "translate(-50,-100)")
             //    .selectAll("circle")
-            //    .data(raw_data)
+            //    .data(location_point)
             //    .enter()
             //    .append("circle")
             //    .attr("cx", function(d){
@@ -383,20 +383,18 @@ function draw_map(){
             //    .attr("r", Math.sqrt(50));
 
 
-            svg .append("circle")
-                .attr("transform", "translate(-130,-100)")
-                .attr("cx", function(){
-                    return projection(["-118.22517559", "33.97980036"])[0];
-                })
-                .attr("cy", function(){
-                    return projection(["-118.22517559", "33.97980036"])[1];
-                })
-                .attr("r", Math.sqrt(10))
-                .style("fill", "orange");
+            //svg .append("circle")
+            //    .attr("transform", "translate(-130,-100)")
+            //    .attr("cx", function(){
+            //        return projection(["-118.22517559", "33.97980036"])[0];
+            //    })
+            //    .attr("cy", function(){
+            //        return projection(["-118.22517559", "33.97980036"])[1];
+            //    })
+            //    .attr("r", Math.sqrt(10))
+            //    .style("fill", "orange");
         });
     });
-
-
 
 
 }
@@ -442,7 +440,7 @@ function draw_points_onmap(){
 
     map_point.attr("transform", "translate(-130,-100)")
         .selectAll("circle")
-        .data(raw_data)
+        .data(location_point)
         .enter()
         .append("circle")
         .attr("cx", function(d){
@@ -455,16 +453,67 @@ function draw_points_onmap(){
                 ,d.geo.coordinates[0].toString()])[1];
         })
         .attr("r", 0)
-        .style("fill", "rgb(80,245,64");
+        .style("fill", function(d){
+            if (d.hillary != 0){
+                return "#fd47a5";
+            }
+            if (d.trump != 0){
+                return "#a43e03";
+            }
+            return "#a2e84f"
+        })
+        .on("mouseover", function(){
+
+
+            d3.select(this)
+                .attr("r", Math.sqrt(200));
+
+            var twitter_data = d3.select(this).data()[0];
+            console.log(twitter_data);
+            var coordinates = d3.mouse(this);
+            var x = coordinates[0];
+            var y = coordinates[1];
+
+            d3.select("#User_name")
+                .text(twitter_data.username);
+
+            d3.select("#twitter")
+                .text(twitter_data.text);
+
+            //d3.select("#post_time")
+            //    .text(twitter_data.created_at);
+
+            d3.select("#post_time")
+                .text(function(){
+                    return String(twitter_data.created_at).slice(0, -11);
+                });
+
+            d3.select("#profile_img")
+                .attr("src", function(){
+                    return twitter_data.user_profile_img;
+                });
+
+            d3.select("#customer_info")
+                .style("left", x-100 + "px")
+                .style("top", y-100 + "px")
+                .style("opacity", 0.8);
+
+            d3.select("#customer_info").classed("hidden", false);
+        })
+        .on("mouseout", function(){
+
+            d3.select(this)
+                .attr("r", Math.sqrt(30));
+            d3.select("#customer_info").classed("hidden", true);
+        });
 
     map_point.selectAll("circle")
         .transition()
         .duration(1000)
         .delay(function(d, i){ return i * 100})
-        .attr("r", Math.sqrt(30))
-        .attr("r", Math.sqrt(300))
-        .style('opacity', 0)
-        .remove();
+        .attr("r", Math.sqrt(30));
+
+
 
 }
 

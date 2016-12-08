@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link type="text/css" rel="stylesheet" href="../twitter_style.css">
+    <script src="http://d3js.org/d3.v3.js"></script>
+    <script src="d3.layout.cloud.js"></script>
+    <style>
+        body { font: 12px Arial;}
+
+        path {
+            /*stroke: steelblue;*/
+            stroke-width: 2;
+            fill: none;
+        }
+
+        .axis path,
+        .axis line {
+            fill: none;
+            stroke: grey;
+            stroke-width: 1;
+            shape-rendering: crispEdges;
+        }
+        .axis text {
+            font: 10px sans-serif;
+        }
+        .legend {
+            border: 1px solid #555555;
+            border-radius: 5px 5px 5px 5px;
+            font-size: 0.8em;
+            margin: 10px;
+            padding: 8px;
+        }
+    </style>
+</head>
+
+<div id="header_content">
+    <h2 id="title">Twitter Emotion Analysis</h2>
+    <nav id="nav">
+        <ul>
+            <li><a href="../index.html">Homepage</a></li>
+            <li><a href="sent_cloud.html">More</a></li>
+            <li><a href="#">About us</a></li>
+        </ul>
+    </nav>
+</div>
+
+
+
+
+<body>
+<div id="more_page">
+    <div id="input1">
+        <form oninput="output.value = (input.value / 240).toFixed(3)" style="top:10px;left:10px;">
+            <input id="input" type="range" min="0" max="240" value="60" style="width:240px;">
+            <i>k</i> = <output name="output" for="input">0.250</output> of time interval from 5:00pm to 1:30am
+        </form>
+    </div>
+    <div style="width: 40%;">
+        <div class="legend">
+            Commonly used words are larger and slightly faded in color.  Less common words are smaller and darker.
+        </div>
+    </div>
+    <div>
+        <span id='sentiment_line'></span>
+        <span id='sentiment_line2'></span>
+    </div>
+    <div>
+        <span id='word_cloud'></span>
+        <span id='word_cloud2'></span>
+    </div>
+</div>
+
+
+<script>
+    var Vis = {};
+    Vis.data = new Array();
+    var parseDate = d3.time.format("%a %b %d %H:%M:%S %Z %Y").parse;
+
+    //var json_file = "sampleJsonData.json";
+    var color = d3.scale.linear()
+            .domain([0,1,2,3,4,5,6,10,15,20,100])
+            .range(["#FADBD8", "#F2D7D5", "#F5B7B1", "#E6B0AA", "#F1948A", "#D98880", "#EC7063", "#CD6155", "#E74C3C", "#C0392B", "#CB4335", "#A93226"]);
+    color2 = d3.scale.linear()
+            .domain([0,1,2,3,4,5,6,10,15,20,100])
+            .range(["#EBF5FB", "#EAF2F8", "#D6EAF8", "#D4E6F1", "#AED6F1", "#A9CCE3", "#85C1E9", "#7FB3D5", "#5DADE2", "#5499C7", "#3498DB", "#2980B9"]);
+    var words_scale = d3.scale.linear().range([10,50]);
+    var top_k = 70;
+    var start_time = new Date("Tue Nov 08 21:15:39 +0000 2016"),
+            end_time = new Date("Wed Nov 09 06:47:32 +0000 2016");
+
+    function loadJson(selection, k) {
+        d3.json("sampleJsonData.json", function(error, data) {
+            Vis.data = data;
+            var tweets_str = "";
+            var total = Vis.data
+                    .forEach(function(d, i){
+                        d.created_at = parseDate(d.created_at);
+                        if(((d.created_at.getTime()-start_time.getTime())/(end_time.getTime()-start_time.getTime()) <= k)
+                                && (d.trump ==1)) {
+                            tweets_str = tweets_str + " " + d["text"];
+                        }
+                    });
+            ///////////////////////////////////////////////////////////////
+            var cleanString = tweets_str.replace(/[\.,-\/#!$%\^&\*;:{}=\-_`~()]/g,"").toLowerCase(),
+                words = cleanString.split(' '),
+                    frequencies = {},
+                    word, i, key;
+            for( i=0; i<words.length; i++ ) {
+                word = words[i];
+                frequencies[word] = frequencies[word] || 0;
+                frequencies[word]++;
+            }
+            words = Object.keys( frequencies );
+            words = words.sort(function (a,b) { return frequencies[b] -frequencies[a];}).slice(0,top_k);
+            words = words.map(function(d) {
+                return {text: d, size: frequencies[d]};
+            });
+            words_scale.domain([
+                d3.min(words, function(d){return d.size;}),
+                d3.max(words, function(d){return d.size;})
+            ]);
+            //////////////////////////////////////////////////////////////
+            //console.log(words);
+            d3.layout.cloud().size([600, 280])
+                    .words(words)
+                    .padding(0)
+                    .rotate(0)
+                    .fontSize(function(d) { return words_scale(d.size); })
+                    .on("end", drawCloud)
+                    .start();
+
+            function drawCloud(words) {
+                selection.selectAll("svg").remove();
+                selection.append("svg")
+                        .attr("width", 450)
+                        .attr("height", 250)
+                        .attr("class", "wordcloud")
+                        .append("g")
+                        // without the transform, words words would get cutoff to the left and top, they would
+                        // appear outside of the SVG area
+                        .attr("transform", "translate(150,150)")
+                        .selectAll("text")
+                        .data(words)
+                        .enter().append("text")
+                        .style("font-size", function(d) { return d.size + "px"; })
+                        .style("fill", function(d, i) { return color(i); })
+                        .attr("transform", function(d) {
+                            return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+                        })
+                        .text(function(d) { return d.text; });
+            }
+        });
+    }
+    function loadJson2(selection, k) {
+        d3.json("sampleJsonData.json", function(error, data) {
+            Vis.data = data;
+            var tweets_str = "";
+            var total = Vis.data
+                    .forEach(function(d, i){
+                        d.created_at = parseDate(d.created_at);
+                        if(((d.created_at.getTime()-start_time.getTime())/(end_time.getTime()-start_time.getTime()) <= k)
+                                && (d.hillary ==1)) {
+                            tweets_str = tweets_str + " " + d["text"];
+                        }
+                    });
+            ///////////////////////////////////////////////////////////////
+            var cleanString = tweets_str.replace(/[\.,-\/#!$%\^&\*;:{}=\-_`~()]/g,"").toLowerCase(),
+                    words = cleanString.split(' '),
+                    frequencies = {},
+                    word, i, key;
+            for( i=0; i<words.length; i++ ) {
+                word = words[i];
+                frequencies[word] = frequencies[word] || 0;
+                frequencies[word]++;
+            }
+            words = Object.keys( frequencies );
+            words = words.sort(function (a,b) { return frequencies[b] -frequencies[a];}).slice(0,top_k);
+            words = words.map(function(d) {
+                return {text: d, size: frequencies[d]};
+            });
+            words_scale.domain([
+                d3.min(words, function(d){return d.size;}),
+                d3.max(words, function(d){return d.size;})
+            ]);
+            //////////////////////////////////////////////////////////////
+            //console.log(words);
+            d3.layout.cloud().size([600, 280])
+                    .words(words)
+                    .padding(0)
+                    .rotate(0)
+                    .fontSize(function(d) { return words_scale(d.size); })
+                    .on("end", drawCloud)
+                    .start();
+
+            function drawCloud(words) {
+                selection.selectAll("svg").remove();
+                selection.append("svg")
+                        .attr("width", 450)
+                        .attr("height", 250)
+                        .attr("class", "wordcloud")
+                        .append("g")
+                        // without the transform, words words would get cutoff to the left and top, they would
+                        // appear outside of the SVG area
+                        .attr("transform", "translate(150,150)")
+                        .selectAll("text")
+                        .data(words)
+                        .enter().append("text")
+                        .style("font-size", function(d) { return d.size + "px"; })
+                        .style("fill", function(d, i) { return color2(i); })
+                        .attr("transform", function(d) {
+                            return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+                        })
+                        .text(function(d) { return d.text; });
+            }
+        });
+    }
+
+    function create_sentChart(selection, k){
+        console.log(k);
+        var margin = {top: 30, right: 20, bottom: 30, left: 50},
+                width = 450 - margin.left - margin.right,
+                height = 200 - margin.top - margin.bottom;
+
+        var x = d3.time.scale().range([0, width]);
+        var y = d3.scale.linear().range([height, 0]);
+
+        // Define the axes
+        var xAxis = d3.svg.axis().scale(x)
+                .orient("bottom")
+                .tickFormat(d3.time.format("%H:%M"))
+                .ticks(5);
+        var yAxis = d3.svg.axis().scale(y)
+                .orient("left").ticks(5);
+        var valueline = d3.svg.line()
+                .x(function(d) { return x(d.key); })
+                .y(function(d) { return y(d.values); });
+
+
+        // Adds the svg canvas
+        selection.selectAll("svg").remove();
+        var svg = selection
+                .append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform",
+                        "translate(" + margin.left + "," + margin.top + ")");
+
+        d3.json("sampleJsonData.json", function(error, data) {
+            var createTime;
+            data.forEach(function(d, i){
+                d.sent = +d.sent;
+                //d.created_at = dateFmt.parse(d.created_at);
+                //console.log(date);
+//                d.created_at = parseDate(d.created_at);
+//                createTime = d.created_at.getTime();
+            });
+            data = data.filter(function(d){
+                if(d.trump != 1){
+                    return false;
+                }
+                else{
+                    return true;
+                }
+            });
+
+            var dateAvgSent = d3.nest()
+                    .key(function(d) { return d.created_at; })
+                    .rollup(function(v) { return d3.mean(v, function(d) { return d.sent; }); })
+                    .entries(data);
+
+            var halfHourDateSent = [];
+            var countnum = 0, sum = 0, j = 1;
+
+
+            dateAvgSent.forEach(function(d,i){
+                //d.key = dateFmt.parse(d.key);
+                d.key = parseDate(d.key);
+                d.values = +d.values;
+                var minute = d.key.getTime();
+                //console.log(minute);
+                countnum = countnum+1;
+                if((minute-start_time.getTime())/(end_time.getTime()-start_time.getTime()) <= k) {
+                    //tweets_str = tweets_str + " " + d["text"];
+                    if(minute<(start_time.getTime()+j*((end_time.getTime()-start_time.getTime()))/(40))){
+                        sum = sum+d.values;
+                    }
+//                    if(minute < (start_time.getTime()+j*30*60*1000)){
+//                        sum = sum+d.values;
+//                    }
+                    else{
+                        var halfHourDateSent_dict = {};
+                        halfHourDateSent_dict.key = d.key;
+                        halfHourDateSent_dict.values = (sum+d.values)/countnum;
+                        halfHourDateSent.push(halfHourDateSent_dict);
+                        j = j+1;
+                        sum = 0;
+                        countnum = 0;
+                    }
+                }
+
+            });
+            //console.log(JSON.stringify(dateAvgSent));
+            //console.log(halfHourDateSent);
+            //console.log(dateAvgSent);
+
+            x.domain(d3.extent(halfHourDateSent, function(d) { return d.key; }));
+            y.domain([d3.min(halfHourDateSent, function(d) { return d.values; }), d3.max(halfHourDateSent, function(d) { return d.values; })]);
+
+            // Add the valueline path.
+            svg.append("path")
+                    .attr("class", "line")
+                    .attr("d", valueline(halfHourDateSent))
+                    .attr("stroke", "FireBrick");
+
+            // Add the X Axis
+            svg.append("g")
+                    .attr("class", "x axis")
+                    .attr("transform", "translate(0," + height + ")")
+                    .call(xAxis)
+                    .selectAll("text")
+//                    .attr("y", 0)
+//                    .attr("x", 9)
+//                    .attr("dy", ".35em")
+                    .attr("transform", "rotate(45)");
+
+            // Add the Y Axis
+            svg.append("g")
+                    .attr("class", "y axis")
+                    .call(yAxis);
+        });
+    }
+    function create_sentChart2(selection, k){
+        console.log(k);
+        var margin = {top: 30, right: 20, bottom: 30, left: 50},
+                width = 450 - margin.left - margin.right,
+                height = 200 - margin.top - margin.bottom;
+
+        var x = d3.time.scale().range([0, width]);
+        var y = d3.scale.linear().range([height, 0]);
+
+        // Define the axes
+        var xAxis = d3.svg.axis().scale(x)
+                .orient("bottom")
+                .tickFormat(d3.time.format("%H:%M"))
+                .ticks(5);
+        var yAxis = d3.svg.axis().scale(y)
+                .orient("left").ticks(5);
+        var valueline = d3.svg.line()
+                .x(function(d) { return x(d.key); })
+                .y(function(d) { return y(d.values); });
+
+
+        // Adds the svg canvas
+        selection.selectAll("svg").remove();
+        var svg = selection
+                .append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform",
+                        "translate(" + margin.left + "," + margin.top + ")");
+
+        d3.json("sampleJsonData.json", function(error, data) {
+            var createTime;
+            data.forEach(function(d, i){
+                d.sent = +d.sent;
+                //d.created_at = dateFmt.parse(d.created_at);
+                //console.log(date);
+//                d.created_at = parseDate(d.created_at);
+//                createTime = d.created_at.getTime();
+            });
+            data = data.filter(function(d){
+                if(d.hillary != 1){
+                    return false;
+                }
+                else{
+                    return true;
+                }
+            });
+
+            var dateAvgSent = d3.nest()
+                    .key(function(d) { return d.created_at; })
+                    .rollup(function(v) { return d3.mean(v, function(d) { return d.sent; }); })
+                    .entries(data);
+
+            var halfHourDateSent = [];
+            var countnum = 0, sum = 0, j = 1;
+
+
+            dateAvgSent.forEach(function(d,i){
+                //d.key = dateFmt.parse(d.key);
+                d.key = parseDate(d.key);
+                d.values = +d.values;
+                var minute = d.key.getTime();
+                //console.log(minute);
+                countnum = countnum+1;
+                if((minute-start_time.getTime())/(end_time.getTime()-start_time.getTime()) <= k) {
+                    //tweets_str = tweets_str + " " + d["text"];
+                    if(minute<(start_time.getTime()+j*((end_time.getTime()-start_time.getTime()))/(40))){
+                        sum = sum+d.values;
+                    }
+//                    if(minute < (start_time.getTime()+j*30*60*1000)){
+//                        sum = sum+d.values;
+//                    }
+                    else{
+                        var halfHourDateSent_dict = {};
+                        halfHourDateSent_dict.key = d.key;
+                        halfHourDateSent_dict.values = (sum+d.values)/countnum;
+                        halfHourDateSent.push(halfHourDateSent_dict);
+                        j = j+1;
+                        sum = 0;
+                        countnum = 0;
+                    }
+                }
+
+            });
+            //console.log(JSON.stringify(dateAvgSent));
+            //console.log(halfHourDateSent);
+            //console.log(dateAvgSent);
+
+            x.domain(d3.extent(halfHourDateSent, function(d) { return d.key; }));
+            y.domain([d3.min(halfHourDateSent, function(d) { return d.values; }), d3.max(halfHourDateSent, function(d) { return d.values; })]);
+
+            // Add the valueline path.
+            svg.append("path")
+                    .attr("class", "line")
+                    .attr("d", valueline(halfHourDateSent))
+                    .attr("stroke", "steelblue");
+
+            // Add the X Axis
+            svg.append("g")
+                    .attr("class", "x axis")
+                    .attr("transform", "translate(0," + height + ")")
+                    .call(xAxis)
+                    .selectAll("text")
+                    //                    .attr("y", 0)
+                    //                    .attr("x", 9)
+                    //                    .attr("dy", ".35em")
+                    .attr("transform", "rotate(45)");
+
+            // Add the Y Axis
+            svg.append("g")
+                    .attr("class", "y axis")
+                    .call(yAxis);
+        });
+    }
+
+
+    d3.select("#word_cloud").call(loadJson, .25);
+    d3.select("#word_cloud2").call(loadJson2, .25);
+    d3.select("#sentiment_line").call(create_sentChart, .25);
+    d3.select("#sentiment_line2").call(create_sentChart2, .25);
+
+    d3.select("form").on("input", function() {
+        d3.select("#word_cloud").call(loadJson, +this.output.value);
+        d3.select("#word_cloud2").call(loadJson2, +this.output.value);
+        d3.select("#sentiment_line").call(create_sentChart, +this.output.value);
+        d3.select("#sentiment_line2").call(create_sentChart2, +this.output.value);
+    });
+
+
+    //loadJson(json_file, 0.25);
+    //create_sentChart();
+
+
+</script>
+</body>
+</html>
