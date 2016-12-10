@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
-    <link type="text/css" rel="stylesheet" href="../twitter_style.css">
     <script src="http://d3js.org/d3.v3.js"></script>
     <script src="d3.layout.cloud.js"></script>
     <style>
@@ -32,66 +31,74 @@
             margin: 10px;
             padding: 8px;
         }
+        .area1 {
+            fill: steelblue;
+            clip-path: url(#clip);
+        }
+        .area2 {
+            fill: darkred;
+            clip-path: url(#clip);
+        }
+        .brush .extent {
+            stroke: #fff;
+            fill-opacity: .125;
+            shape-rendering: crispEdges;
+        }
     </style>
 </head>
-
-<div id="header_content">
-    <h2 id="title">Twitter Emotion Analysis</h2>
-    <nav id="nav">
-        <ul>
-            <li><a href="../index.html">Homepage</a></li>
-            <li><a href="sent_cloud.html">More</a></li>
-            <li><a href="#">About us</a></li>
-        </ul>
-    </nav>
+<div>
+    <span id='sentiment_area1'></span>
+    <span id='sentiment_area2'></span>
 </div>
-
-
-
+<div style="width: 40%;">
+    <div class="legend">
+        You can brush above timestamp for tweets sentiment detail. sentiment scores in range (-1,1).
+        If negative the tweets show negative emotions.
+    </div>
+    <div class="legend">
+        Slide the bar below to control the time process. See the average trend during that time.
+        For the word cloud, commonly used words are larger and slightly faded in color.  Less common words are smaller and darker.
+        For the topic words. More positive emotions on the topics, the larger and redder the topic is. Negative feelings are in blue color.
+    </div>
+</div>
+<div id="input1">
+    <form oninput="output.value = (input.value / 240).toFixed(2)" style="top:10px;left:10px;">
+        <input id="input" type="range" min="0" max="240" value="60" style="width:240px;">
+        <i>Time Process</i> : <output name="output" for="input">0.25</output> loaded ...
+    </form>
+</div>
+<div>
+    <span id='sentiment_line'></span>
+    <span id='sentiment_line2'></span>
+</div>
+<div>
+    <span id='word_cloud'></span>
+    <span id='word_cloud2'></span>
+</div>
+<div>
+    <span id='topic_word'></span>
+</div>
 
 <body>
-<div id="more_page">
-    <div id="input1">
-        <form oninput="output.value = (input.value / 240).toFixed(3)" style="top:10px;left:10px;">
-            <input id="input" type="range" min="0" max="240" value="60" style="width:240px;">
-            <i>k</i> = <output name="output" for="input">0.250</output> of time interval from 5:00pm to 1:30am
-        </form>
-    </div>
-    <div style="width: 40%;">
-        <div class="legend">
-            Commonly used words are larger and slightly faded in color.  Less common words are smaller and darker.
-        </div>
-    </div>
-    <div>
-        <span id='sentiment_line'></span>
-        <span id='sentiment_line2'></span>
-    </div>
-    <div>
-        <span id='word_cloud'></span>
-        <span id='word_cloud2'></span>
-    </div>
-</div>
-
-
 <script>
     var Vis = {};
     Vis.data = new Array();
     var parseDate = d3.time.format("%a %b %d %H:%M:%S %Z %Y").parse;
 
-    //var json_file = "sampleJsonData.json";
+    var json_file = "sampleJsonData.json";
     var color = d3.scale.linear()
             .domain([0,1,2,3,4,5,6,10,15,20,100])
             .range(["#FADBD8", "#F2D7D5", "#F5B7B1", "#E6B0AA", "#F1948A", "#D98880", "#EC7063", "#CD6155", "#E74C3C", "#C0392B", "#CB4335", "#A93226"]);
     color2 = d3.scale.linear()
             .domain([0,1,2,3,4,5,6,10,15,20,100])
             .range(["#EBF5FB", "#EAF2F8", "#D6EAF8", "#D4E6F1", "#AED6F1", "#A9CCE3", "#85C1E9", "#7FB3D5", "#5DADE2", "#5499C7", "#3498DB", "#2980B9"]);
-    var words_scale = d3.scale.linear().range([10,50]);
-    var top_k = 70;
+    var words_scale = d3.scale.linear().range([10,55]);
+    var top_k = 100;
     var start_time = new Date("Tue Nov 08 21:15:39 +0000 2016"),
             end_time = new Date("Wed Nov 09 06:47:32 +0000 2016");
 
     function loadJson(selection, k) {
-        d3.json("sampleJsonData.json", function(error, data) {
+        d3.json(json_file, function(error, data) {
             Vis.data = data;
             var tweets_str = "";
             var total = Vis.data
@@ -104,7 +111,7 @@
                     });
             ///////////////////////////////////////////////////////////////
             var cleanString = tweets_str.replace(/[\.,-\/#!$%\^&\*;:{}=\-_`~()]/g,"").toLowerCase(),
-                words = cleanString.split(' '),
+                    words = cleanString.split(' '),
                     frequencies = {},
                     word, i, key;
             for( i=0; i<words.length; i++ ) {
@@ -123,7 +130,7 @@
             ]);
             //////////////////////////////////////////////////////////////
             //console.log(words);
-            d3.layout.cloud().size([600, 280])
+            d3.layout.cloud().size([750, 300])
                     .words(words)
                     .padding(0)
                     .rotate(0)
@@ -135,12 +142,12 @@
                 selection.selectAll("svg").remove();
                 selection.append("svg")
                         .attr("width", 450)
-                        .attr("height", 250)
+                        .attr("height", 200)
                         .attr("class", "wordcloud")
                         .append("g")
                         // without the transform, words words would get cutoff to the left and top, they would
                         // appear outside of the SVG area
-                        .attr("transform", "translate(150,150)")
+                        .attr("transform", "translate(200,100)")
                         .selectAll("text")
                         .data(words)
                         .enter().append("text")
@@ -154,7 +161,7 @@
         });
     }
     function loadJson2(selection, k) {
-        d3.json("sampleJsonData.json", function(error, data) {
+        d3.json(json_file, function(error, data) {
             Vis.data = data;
             var tweets_str = "";
             var total = Vis.data
@@ -186,7 +193,7 @@
             ]);
             //////////////////////////////////////////////////////////////
             //console.log(words);
-            d3.layout.cloud().size([600, 280])
+            d3.layout.cloud().size([750, 300])
                     .words(words)
                     .padding(0)
                     .rotate(0)
@@ -198,12 +205,12 @@
                 selection.selectAll("svg").remove();
                 selection.append("svg")
                         .attr("width", 450)
-                        .attr("height", 250)
+                        .attr("height", 200)
                         .attr("class", "wordcloud")
                         .append("g")
                         // without the transform, words words would get cutoff to the left and top, they would
                         // appear outside of the SVG area
-                        .attr("transform", "translate(150,150)")
+                        .attr("transform", "translate(200,100)")
                         .selectAll("text")
                         .data(words)
                         .enter().append("text")
@@ -218,7 +225,7 @@
     }
 
     function create_sentChart(selection, k){
-        console.log(k);
+        //console.log(k);
         var margin = {top: 30, right: 20, bottom: 30, left: 50},
                 width = 450 - margin.left - margin.right,
                 height = 200 - margin.top - margin.bottom;
@@ -248,7 +255,7 @@
                 .attr("transform",
                         "translate(" + margin.left + "," + margin.top + ")");
 
-        d3.json("sampleJsonData.json", function(error, data) {
+        d3.json(json_file, function(error, data) {
             var createTime;
             data.forEach(function(d, i){
                 d.sent = +d.sent;
@@ -321,9 +328,9 @@
                     .attr("transform", "translate(0," + height + ")")
                     .call(xAxis)
                     .selectAll("text")
-//                    .attr("y", 0)
-//                    .attr("x", 9)
-//                    .attr("dy", ".35em")
+                    //                    .attr("y", 0)
+                    //                    .attr("x", 9)
+                    //                    .attr("dy", ".35em")
                     .attr("transform", "rotate(45)");
 
             // Add the Y Axis
@@ -333,7 +340,7 @@
         });
     }
     function create_sentChart2(selection, k){
-        console.log(k);
+        //console.log(k);
         var margin = {top: 30, right: 20, bottom: 30, left: 50},
                 width = 450 - margin.left - margin.right,
                 height = 200 - margin.top - margin.bottom;
@@ -363,7 +370,7 @@
                 .attr("transform",
                         "translate(" + margin.left + "," + margin.top + ")");
 
-        d3.json("sampleJsonData.json", function(error, data) {
+        d3.json(json_file, function(error, data) {
             var createTime;
             data.forEach(function(d, i){
                 d.sent = +d.sent;
@@ -424,12 +431,6 @@
             x.domain(d3.extent(halfHourDateSent, function(d) { return d.key; }));
             y.domain([d3.min(halfHourDateSent, function(d) { return d.values; }), d3.max(halfHourDateSent, function(d) { return d.values; })]);
 
-            // Add the valueline path.
-            svg.append("path")
-                    .attr("class", "line")
-                    .attr("d", valueline(halfHourDateSent))
-                    .attr("stroke", "steelblue");
-
             // Add the X Axis
             svg.append("g")
                     .attr("class", "x axis")
@@ -445,25 +446,409 @@
             svg.append("g")
                     .attr("class", "y axis")
                     .call(yAxis);
+
+            // Add the valueline path.
+            svg.append("path")
+                    .attr("class", "line")
+                    .attr("d", valueline(halfHourDateSent))
+                    .attr("stroke", "steelblue");
         });
     }
 
+    function topic_bubble(selection,k){
+        var margin = {top: 10, right: 20, bottom: 30, left: 50},
+                width = 900 - margin.left - margin.right,
+                height = 200 - margin.top - margin.bottom;
+
+        var xValue = function(d) { return d.topic;}, // data -> value
+                xScale = d3.scale.ordinal()
+                //.domain(["apple", "orange", "banana", "grapefruit"])
+                        .rangePoints([0, width]), // value -> display
+                xMap = function(d) { return xScale(xValue(d));}, // data -> display
+                xAxis = d3.svg.axis().scale(xScale).orient("bottom");
+
+        // setup y
+        var yValue = function(d) { return d.count;}, // data -> value
+                yScale = d3.scale.linear().range([height, 0]), // value -> display
+                yMap = function(d) { return yScale(yValue(d));}, // data -> display
+                yAxis = d3.svg.axis().scale(yScale).orient("left");
+
+        var rValue = function(d) { return d.sent;}, // data -> value
+                rScale = d3.scale.linear().range([5, 30]), // value -> display
+                rMap = function(d) { return rScale(rValue(d));}; // data -> display
+
+        var oValue = function(d) { return d.sent;},
+                oScale = d3.scale.linear().range([0.2, 0.8]), // value -> display
+                oMap = function(d) { return oScale(oValue(d));}; // data -> display
+        //color = d3.scale.category20();
+
+        //d3.select(selection).selectAll("svg").remove();
+        selection.selectAll("svg").remove();
+        //var svg = d3.select(selection)
+        var svg = selection
+                .append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform",
+                        "translate(" + margin.left + "," + margin.top + ")");
+
+        d3.json(json_file, function(error, data) {
+            var sent_education = 0,
+                    count_education = 0,
+                    sent_health = 0,
+                    count_health = 0,
+                    sent_immigration = 0,
+                    count_immigration = 0,
+                    sent_military = 0,
+                    count_military = 0,
+                    sent_house = 0,
+                    count_house = 0,
+                    sent_clothing = 0,
+                    count_clothing = 0,
+                    sent_job = 0,
+                    count_job = 0,
+                    sent_economy = 0,
+                    count_economy = 0,
+                    sent_international = 0,
+                    count_international = 0,
+                    sent_race = 0,
+                    count_race = 0,
+                    sent_freedom = 0,
+                    count_freedom = 0,
+                    sent_equal = 0,
+                    count_equal = 0;
+
+            var topic_json_list = [];
+            data.forEach(function(d, i){
+                d.sent = +d.sent;
+                d.created_at = parseDate(d.created_at);
+                if((d.created_at.getTime()-start_time.getTime())/(end_time.getTime()-start_time.getTime()) <= k)
+                {
+                    if (d.education == 1) {
+                        sent_education = sent_education + d.sent;
+                        count_education++
+                    }
+                    if (d.health == 1) {
+                        sent_health = sent_health + d.sent;
+                        count_health++;
+                    }
+                    if (d.immigration == 1) {
+                        sent_immigration = sent_immigration + d.sent;
+                        count_immigration++
+                    }
+                    if (d.military == 1) {
+                        sent_military = sent_military + d.sent;
+                        count_military++;
+                    }
+                    if (d.house == 1) {
+                        sent_house = sent_house + d.sent;
+                        count_house++
+                    }
+                    if (d.clothing == 1) {
+                        sent_clothing = sent_clothing + d.sent;
+                        count_clothing++;
+                    }
+                    if (d.job == 1) {
+                        sent_job = sent_job + d.sent;
+                        count_job++
+                    }
+                    if (d.economy == 1) {
+                        sent_economy = sent_economy + d.sent;
+                        count_economy++;
+                    }
+                    if (d.international == 1) {
+                        sent_international = sent_international + d.sent;
+                        count_international++
+                    }
+                    if (d.race == 1) {
+                        sent_race = sent_race + d.sent;
+                        count_race++;
+                    }
+                    if (d.freedom == 1) {
+                        sent_freedom = sent_freedom + d.sent;
+                        count_freedom++
+                    }
+                    if (d.equal == 1) {
+                        sent_equal = sent_equal + d.sent;
+                        count_equal++;
+                    }
+                }
+                //d.created_at = dateFmt.parse(d.created_at);
+                //console.log(date);
+//                d.created_at = parseDate(d.created_at);
+//                createTime = d.created_at.getTime();
+            });
+
+            topic_json_list.push(
+                    {
+                        topic:"education",
+                        sent: sent_education/count_education,
+                        count: count_education
+                    },
+                    {
+                        topic:"health",
+                        sent: sent_health/count_health,
+                        count: count_health
+                    },
+                    {
+                        topic:"immigration",
+                        sent: sent_immigration/count_immigration,
+                        count: count_immigration
+                    },
+                    {
+                        topic:"military",
+                        sent: sent_military/count_military,
+                        count: count_military
+                    },
+                    {
+                        topic:"house",
+                        sent: sent_house/count_house,
+                        count: count_house
+                    },
+                    {
+                        topic:"clothing",
+                        sent: sent_clothing/count_clothing,
+                        count: count_clothing
+                    },
+                    {
+                        topic:"job",
+                        sent: sent_job/count_job,
+                        count: count_job
+                    },
+                    {
+                        topic:"economy",
+                        sent: sent_economy/count_economy,
+                        count: count_economy
+                    },
+                    {
+                        topic:"international",
+                        sent: sent_international/count_international,
+                        count: count_international
+                    },
+                    {
+                        topic:"race",
+                        sent: sent_race/count_race,
+                        count: count_race
+                    },
+                    {
+                        topic:"freedom",
+                        sent: sent_freedom/count_freedom,
+                        count: count_freedom
+                    },
+                    {
+                        topic:"equality",
+                        sent: sent_equal/count_equal,
+                        count: count_equal
+                    }
+
+            );
+
+            xScale.domain(topic_json_list.map(function (d) {
+                return d.topic;
+            }));
+            //yScale.domain([d3.min(topic_json_list, yValue), d3.max(topic_json_list, yValue)]);
+            yScale.domain([0, 1200]);
+            rScale.domain([d3.min(topic_json_list, rValue), d3.max(topic_json_list, rValue)]);
+            oScale.domain([d3.min(topic_json_list, oValue), d3.max(topic_json_list, oValue)]);
+
+
+            // x-axis
+            svg.append("g")
+                    .attr("class", "x axis")
+                    .attr("transform", "translate(0," + height + ")")
+                    .call(xAxis)
+                    .append("text")
+                    .attr("class", "label")
+                    .attr("x", width)
+                    .attr("y", -6)
+                    .style("text-anchor", "end")
+                    .text("Topic");
+            // y-axis
+            svg.append("g")
+                    .attr("class", "y axis")
+                    .call(yAxis)
+                    .append("text")
+                    .attr("class", "label")
+                    //.attr("transform", 0)
+                    .attr("x", 150)
+                    .attr("dy", ".71em")
+                    .style("text-anchor", "end")
+                    .text("Tweets Count for Each Topic.");
+
+            svg.selectAll("circle")
+                    .data(topic_json_list)
+                    .enter().append("circle")
+            //.attr("class", "dot")
+                    .attr("r", function(d){
+                        return rScale(Math.abs(d.sent));
+                    })
+                    .attr("opacity", oMap)  // radius
+                    .attr("cx", xMap)
+                    .attr("cy", yMap)
+                    .style("fill", function(d) {
+                        //if(isNaN(d.MPG))return"white";
+                        if(d.sent>=0) {
+                            return "red";
+                        }
+                        else{
+                            return "blue";
+                        }
+                        //return color(cValue(d));
+                    })
+        })
+    }
+
+    function draw_area(selection, who, areaClass) {
+        var margin = { top: 10, right: 10, bottom: 100, left: 40 },
+                margin2 = { top: 230, right: 10, bottom: 20, left: 40 },
+                width = 480 - margin.left - margin.right,
+                height = 300 - margin.top - margin.bottom,
+                height2 = 300 - margin2.top - margin2.bottom;
+
+        var parseDate = d3.time.format("%a %b %d %H:%M:%S %Z %Y").parse;
+
+        var x = d3.time.scale().range([0, width]),
+                x2 = d3.time.scale().range([0, width]),
+                y = d3.scale.linear().range([height, 0]),
+                y2 = d3.scale.linear().range([height2, 0]);
+
+        var xAxis = d3.svg.axis().scale(x).orient("bottom"),
+                xAxis2 = d3.svg.axis().scale(x2).orient("bottom"),
+                yAxis = d3.svg.axis().scale(y).orient("left");
+
+        var brush = d3.svg.brush()
+                .x(x2)
+                .on("brush", brushed);
+
+        var area = d3.svg.area()
+                .interpolate("monotone")
+                .x(function (d) { return x(d.key); })
+                .y0(height)
+                .y1(function (d) { return y(d.values); });
+
+        var area2 = d3.svg.area()
+                .interpolate("monotone")
+                .x(function (d) { return x2(d.key); })
+                .y0(height2)
+                .y1(function (d) { return y2(d.values); });
+
+
+        var svg = d3.select(selection).append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom);
+
+        svg.append("defs").append("clipPath")
+                .attr("id", "clip")
+                .append("rect")
+                .attr("width", width)
+                .attr("height", height);
+
+        var focus = svg.append("g")
+                .attr("class", "focus")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        var context = svg.append("g")
+                .attr("class", "context")
+                .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
+
+        d3.json(json_file, function (error, data) {
+            data.forEach(function(d, i){
+                d.sent = +d.sent;
+                //d.created_at = dateFmt.parse(d.created_at);
+                //console.log(date);
+//                d.created_at = parseDate(d.created_at);
+//                createTime = d.created_at.getTime();
+            });
+            data = data.filter(function(d){
+                if(d[who] != 1){
+                    return false;
+                }
+                else{
+                    return true;
+                }
+            });
+            var dateAvgSent = d3.nest()
+                    .key(function(d) { return d.created_at; })
+                    .rollup(function(v) { return d3.mean(v, function(d) { return d.sent; }); })
+                    .entries(data);
+
+            dateAvgSent.forEach(function(d,i){
+                //d.key = dateFmt.parse(d.key);
+                d.key = parseDate(d.key);
+                d.values = +d.values;
+            });
+
+            x.domain(d3.extent(dateAvgSent.map(function (d) { return d.key; })));
+            y.domain([d3.min(dateAvgSent.map(function (d) { return d.values; })), d3.max(dateAvgSent.map(function (d) { return d.values; }))]);
+            x2.domain(x.domain());
+            y2.domain(y.domain());
+
+            focus.append("path")
+                    .datum(dateAvgSent)
+                    .attr("class", areaClass)
+                    .attr("d", area);
+
+            focus.append("g")
+                    .attr("class", "x axis")
+                    .attr("transform", "translate(0," + height + ")")
+                    .call(xAxis);
+
+            focus.append("g")
+                    .attr("class", "y axis")
+                    .call(yAxis)
+                    .append("text")
+                    .attr("class", "label")
+                    //.attr("transform", 0)
+                    .attr("x", 200)
+                    .attr("dy", ".71em")
+                    .style("text-anchor", "end")
+                    .text("Tweets Emotion about "+who);
+
+            context.append("path")
+                    .datum(dateAvgSent)
+                    .attr("class", areaClass)
+                    .attr("d", area2);
+
+            context.append("g")
+                    .attr("class", "x axis")
+                    .attr("transform", "translate(0," + height2 + ")")
+                    .call(xAxis2);
+
+            context.append("g")
+                    .attr("class", "x brush")
+                    .call(brush)
+                    .selectAll("rect")
+                    .attr("y", -6)
+                    .attr("height", height2 + 7);
+        });
+
+        function brushed() {
+            x.domain(brush.empty() ? x2.domain() : brush.extent());
+            focus.select("."+areaClass).attr("d", area);
+            focus.select(".x.axis").call(xAxis);
+        }
+    }
+
+    draw_area("#sentiment_area1","trump", "area2");
+    draw_area("#sentiment_area2","hillary", "area1");
 
     d3.select("#word_cloud").call(loadJson, .25);
-    d3.select("#word_cloud2").call(loadJson2, .25);
+    d3.select("#word_cloud2").call(loadJson2, .25);//
     d3.select("#sentiment_line").call(create_sentChart, .25);
     d3.select("#sentiment_line2").call(create_sentChart2, .25);
+    d3.select("#topic_word").call(topic_bubble, .25);
 
     d3.select("form").on("input", function() {
         d3.select("#word_cloud").call(loadJson, +this.output.value);
         d3.select("#word_cloud2").call(loadJson2, +this.output.value);
         d3.select("#sentiment_line").call(create_sentChart, +this.output.value);
         d3.select("#sentiment_line2").call(create_sentChart2, +this.output.value);
+        d3.select("#topic_word").call(topic_bubble, +this.output.value);
     });
 
 
-    //loadJson(json_file, 0.25);
-    //create_sentChart();
+
 
 
 </script>
