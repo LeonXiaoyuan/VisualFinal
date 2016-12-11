@@ -4,6 +4,17 @@
     /*background-color: blue;*/
     background: rgb(34,34,52);
 }
+#third_page{
+    padding:0px;
+    margin: 0px;
+    /*background-color: blue;*/
+}
+#second_page{
+    padding:0px;
+    margin: 0px;
+    /*background: rgb(34,34,52);*/
+}
+
 #header_content{
     background: lightgray;
     padding:10px;

@@ -5,8 +5,8 @@
     <title>Title</title>
     <script src="http://d3js.org/d3.v3.js"></script>
     <script src="d3.layout.cloud.js"></script>
+    <link type="text/css" rel="stylesheet" href="../css/twitter_style.css">
     <style>
-        body { font: 12px Arial;}
 
         path {
             /*stroke: steelblue;*/
@@ -44,42 +44,67 @@
             fill-opacity: .125;
             shape-rendering: crispEdges;
         }
+
+        #third_page_content{
+            MARGIN-RIGHT: auto;
+            MARGIN-LEFT: auto;
+            height:200px;
+            width:1000px;
+            vertical-align:middle;
+            font: 12px Arial;
+            /*line-height:200px;*/
+        }
     </style>
 </head>
-<div>
-    <span id='sentiment_area1'></span>
-    <span id='sentiment_area2'></span>
-</div>
-<div style="width: 40%;">
-    <div class="legend">
-        You can brush above timestamp for tweets sentiment detail. sentiment scores in range (-1,1).
-        If negative the tweets show negative emotions.
-    </div>
-    <div class="legend">
-        Slide the bar below to control the time process. See the average trend during that time.
-        For the word cloud, commonly used words are larger and slightly faded in color.  Less common words are smaller and darker.
-        For the topic words. More positive emotions on the topics, the larger and redder the topic is. Negative feelings are in blue color.
-    </div>
-</div>
-<div id="input1">
-    <form oninput="output.value = (input.value / 240).toFixed(2)" style="top:10px;left:10px;">
-        <input id="input" type="range" min="0" max="240" value="60" style="width:240px;">
-        <i>Time Process</i> : <output name="output" for="input">0.25</output> loaded ...
-    </form>
-</div>
-<div>
-    <span id='sentiment_line'></span>
-    <span id='sentiment_line2'></span>
-</div>
-<div>
-    <span id='word_cloud'></span>
-    <span id='word_cloud2'></span>
-</div>
-<div>
-    <span id='topic_word'></span>
+
+<body id="third_page">
+<div id="header_content">
+    <h2 id="title">Twitter Emotion Analysis</h2>
+    <nav id="nav">
+        <ul>
+            <li><a href="../index.html">Homepage</a></li>
+            <li><a href="../wordCount.html">Popular Words</a></li>
+            <li><a href="cloud/sent_cloud.html">More</a></li>
+            <li><a href="#">About us</a></li>
+        </ul>
+    </nav>
 </div>
 
-<body>
+<div id="third_page_content">
+    <div>
+        <span id='sentiment_area1'></span>
+        <span id='sentiment_area2'></span>
+    </div>
+    <div style="width: 40%;">
+        <div class="legend">
+            You can brush above timestamp for tweets sentiment detail. sentiment scores in range (-1,1).
+            If negative the tweets show negative emotions.
+        </div>
+        <div class="legend">
+            Slide the bar below to control the time process. See the average trend during that time.
+            For the word cloud, commonly used words are larger and slightly faded in color.  Less common words are smaller and darker.
+            For the topic words. More positive emotions on the topics, the larger and redder the topic is. Negative feelings are in blue color.
+        </div>
+    </div>
+    <div id="input1">
+        <form oninput="output.value = (input.value / 240).toFixed(2)" style="top:10px;left:10px;">
+            <input id="input" type="range" min="0" max="240" value="60" style="width:240px;">
+            <i>Time Process</i> : <output name="output" for="input">0.25</output> loaded ...
+        </form>
+    </div>
+    <div>
+        <span id='sentiment_line'></span>
+        <span id='sentiment_line2'></span>
+    </div>
+    <div>
+        <span id='word_cloud'></span>
+        <span id='word_cloud2'></span>
+    </div>
+    <div>
+        <span id='topic_word'></span>
+    </div>
+</div>
+
 <script>
     var Vis = {};
     Vis.data = new Array();
