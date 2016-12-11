@@ -1,106 +1,72 @@
-<!DOCTYPE html>
-<html>
-
+<!doctype html>
+<!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en"> <![endif]-->
+<!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js ie8 oldie" lang="en"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
 <head>
-    <meta charset="utf-8">
-    <meta name="keywords" lang="de" content="Zeitleiste, Zeitlinie, Zeitkarte, Geschichte, Chronologie">
-    <meta name="keywords" lang="en" content="Timeline, Timemap, History, Chronology">
-    <title>Timeline - Proof-of-concept</title>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
-    <!-- That's my local d3 path. When working locally, use your local path. -->
-    <!--<script src="../../../lib/d3/d3.v3.js"></script>-->
+  <title>vis</title>
+  <meta name="description" content="">
+  <meta name="author" content="">
 
-    <!-- That's the 'official' path. Comment out, when working locally. -->
-    <script src="http://d3js.org/d3.v3.min.js"></script>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
 
-    <!-- Store these two files in your application directory or on your path. -->
-    <script src="timeline.js"></script>
-    <link href="timeline.css" rel="stylesheet" type="text/css" />
+  <!-- CSS concatenated and minified via ant build script-->
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <!-- end CSS-->
 
+  <script src="js/libs/modernizr-2.0.6.min.js"></script>
 </head>
 
 <body>
 
-<div id="timeline"></div>
+  <div id="container" class="container">
+      <select id="text-select">
+        <option value="9pm">11/08 9PM-9:59PM</option>
+        <option value="10pm">11/08 10PM-10:59PM</option>
+        <option value="11pm">11/08 11PM-11:59PM</option>
+        <option value="00am">11/09 0:00AM-0:59AM</option>
+	<option value="01am">11/09 1:00AM-1:59AM</option>
+	<option value="02am">11/09 2:00AM-2:59AM</option>
+	<option value="03am">11/09 3:00AM-3:59AM</option>
+	<option value="04am">11/09 4:00AM-4:59AM</option>
+	<option value="05am">11/09 5:00AM-5:59AM</option>
+	<option value="06am">11/09 6:00AM-6:59AM</option>
+	
+      </select>
+    <header>
+    <h1>Bubble Cloud</h1>
+    <h2>The most frequently used top 20 words at different time on election night of 2016:</h2>
+      <h2 id="book-title"></h2>
+    </header>
+    <div id="main" role="main">
+      <div id="vis"></div>
+      <div id="status"></div>
+     
+    </div>
+    </div> <!--! end of #container -->
 
-<script>
 
-    /*  You need a domElement, a sourceFile and a timeline.
-
-        The domElement will contain your timeline.
-        Use the CSS convention for identifying elements,
-        i.e. "div", "p", ".className", or "#id".
-
-        The sourceFile will contain your data.
-        If you prefer, you can also use tsv, xml, or json files
-        and the corresponding d3 functions for your data.
+  <script>window.jQuery || document.write('<script src="js/libs/jquery-1.7.2.min.js"><\/script>')</script>
 
 
-        A timeline can have the following components:
+  <script defer src="js/plugins.js"></script>
+  <script src="js/libs/d3.min.js"></script>
+  <!--<script type="text/coffeescript" src="coffee/vis.coffee"></script>-->
+  <script src="js/bubble.js"></script>
 
-        .band(bandName, sizeFactor
-            bandName - string; the name of the band for references
-            sizeFactor - percentage; height of the band relation to the total height
-            Defines an area for timeline items.
-            A timeline must have at least one band.
-            Two bands are necessary, to change the selected time interval.
-            Three and Bands are allowed.
+  <script type="text/javascript">
+  </script>
 
-        .xAxis(bandName)
-            bandName - string; the name of the band the xAxis will be attached to
-            Defines an xAxis for a band to show the range of the band.
-            This is optional, but highly recommended.
 
-        .labels(bandName)
-            bandName - string; the name of the band the labels will be attached to
-            Shows the start, length and end of the range of the band.
-            This is optional.
-
-        .tooltips(bandName)
-            bandName - string; the name of the band the labels will be attached to
-            Shows current start, length, and end of the selected interval of the band.
-            This is optional.
-
-        .brush(parentBand, targetBands]
-            parentBand - string; the band that the brush will be attached to
-            targetBands - array; the bands that are controlled by the brush
-            Controls the time interval of the targetBand.
-            Required, if you want to control/change the selected time interval
-            of one of the other bands.
-
-        .redraw()
-            Shows the initial view of the timeline.
-            This is required.
-
-        To make yourself familiar with these components try to
-        - comment out components and see what happens.
-        - change the size factors (second arguments) of the bands.
-        - rearrange the definitions of the components.
-    */
-
-    // Define domElement and sourceFile
-    var domElement = "#timeline";
-    var sourceFile = "word.csv";
-
-    // Read in the data and construct the timeline
-    d3.csv(sourceFile, function(dataset) {
-
-        timeline(domElement)
-            .data(dataset)
-            .band("mainBand", 0.82)
-            .band("naviBand", 0.08)
-            .xAxis("mainBand")
-            .tooltips("mainBand")
-            .xAxis("naviBand")
-            .labels("mainBand")
-            .labels("naviBand")
-            .brush("naviBand", ["mainBand"])
-            .redraw();
-
-    });
-
-</script>
-
+  <!--[if lt IE 7 ]>
+    <script src="//ajax.googleapis.com/ajax/libs/chrome-frame/1.0.3/CFInstall.min.js"></script>
+    <script>window.attachEvent('onload',function(){CFInstall.check({mode:'overlay'})})</script>
+  <![endif]-->
+  
 </body>
-
 </html>
