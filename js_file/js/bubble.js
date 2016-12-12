@@ -14,7 +14,6 @@ Bubbles = function() {
     right: 0,
     bottom: 0,
     left: 0
-	
   };
   maxRadius = 65;
   rScale = d3.scale.sqrt().range([0, maxRadius]);
@@ -282,14 +281,14 @@ $(function() {
   if (!text) {
     text = texts[0];
 }
-console.log("changing...");
+
   $("#text-select").val(key);
   d3.select("#text-select").on("change", function(e) {
     key = $(this).val();
     location.replace("#");
      return location.search = encodeURIComponent(key);
   });
-  d3.select("#time-perod").html(text.name);
+  d3.select("#book-title").html(text.name);
   return d3.csv("data/" + text.file, display);
 });
 
