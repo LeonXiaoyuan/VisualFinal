@@ -282,7 +282,7 @@ $(function() {
   if (!text) {
     text = texts[0];
 }
-
+console.log("changing...");
   $("#text-select").val(key);
   d3.select("#text-select").on("change", function(e) {
     key = $(this).val();
