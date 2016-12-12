@@ -282,8 +282,8 @@ $(function() {
     text = texts[0];
 }
 
-  $("#text-select").val(key);
-  d3.select("#text-select").on("change", function(e) {
+  $("#`").val(key);
+  d3.select("#time-select").on("change", function(e) {
     key = $(this).val();
     location.replace("#");
      return location.search = encodeURIComponent(key);
