@@ -19,9 +19,9 @@ header {
 
 
 
-#text-select {
-  float:right;
-  margin-right: 10px;
+#time-select {
+  float:left;
+  margin-left: 10px;
 }
 
 #vis {
