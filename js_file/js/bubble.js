@@ -288,7 +288,7 @@ $(function() {
     location.replace("#");
      return location.search = encodeURIComponent(key);
   });
-  d3.select("#book-title").html(text.name);
+  d3.select("#time-perod").html(text.name);
   return d3.csv("data/" + text.file, display);
 });
 
