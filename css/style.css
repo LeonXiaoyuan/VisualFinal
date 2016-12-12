@@ -10,18 +10,24 @@ a, a:visited {
   padding-top:20px;
   width: 980px;
   border-left: 2px #ddd solid;
-  border-right: 2px #ddd solid;
+  border-right: 2px #ddd solid; 
+            /*line-height:200px;*/
 }
 
 header {
   padding: 10px;
 }
 
+#time-perod {
+  font-family: georgia, "times new roman", times, serif;
+  color: #555;
+  font-size: 2.3em;
+  text-align: center;
+}
 
-
-#time-select {
-  float:left;
-  margin-left: 10px;
+#text-select {
+  float:right;
+  margin-right: 10px;
 }
 
 #vis {
