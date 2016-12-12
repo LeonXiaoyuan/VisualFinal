@@ -14,6 +14,7 @@ Bubbles = function() {
     right: 0,
     bottom: 0,
     left: 0
+	
   };
   maxRadius = 65;
   rScale = d3.scale.sqrt().range([0, maxRadius]);
@@ -282,8 +283,8 @@ $(function() {
     text = texts[0];
 }
 
-  $("#`").val(key);
-  d3.select("#time-select").on("change", function(e) {
+  $("#text-select").val(key);
+  d3.select("#text-select").on("change", function(e) {
     key = $(this).val();
     location.replace("#");
      return location.search = encodeURIComponent(key);
